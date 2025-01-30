@@ -1,11 +1,44 @@
 import uuid
 from django.contrib.auth.models import AbstractBaseUser
 from django.db import models
+from django.core.validators import MinValueValidator
+
+
+class Priority(models.TextChoices):
+    LOW = 'LOW', 'LOW'
+    MEDIUM = 'MEDIUM', 'MEDIUM'
+    HIGH = 'HIGH', 'HIGH'
+
+
+class Balise(models.TextChoices):
+    BUG = 'BUG', 'BUG'
+    FEATURE = 'FEATURE', 'FEATURE'
+    TASK = 'TASK', 'TASK'
+
+
+class Status(models.TextChoices):
+    TO_DO = 'To Do', 'To Do'
+    IN_PROGRESS = 'In Progress', 'In Progress'
+    FINISHED = 'Finished', 'Finished'
+
+
+class ProjectType(models.TextChoices):
+    BACK_END = 'back-end', 'back-end'
+    FRONT_END = 'front-end', 'front-end'
+    IOS = 'iOS', 'iOS'
+    ANDROID = 'Android', 'Android'
 
 
 class User(AbstractBaseUser):
+    """ Modèle d'utilisateur
+
+    Un utilisateur peut être membre de plusieurs groupes et avoir plusieurs permissions.
+
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     username = models.CharField(max_length=100, unique=True)
-    age = models.PositiveIntegerField(null=False, blank=False)
+    age = models.PositiveIntegerField(null=False, blank=False, validators=[MinValueValidator(0)])
     can_be_contacted = models.BooleanField(default=False)
     can_data_be_shared = models.BooleanField(default=False)
     created_time = models.DateTimeField(auto_now_add=True)
@@ -14,76 +47,94 @@ class User(AbstractBaseUser):
 
     def __str__(self):
         return self.username
-    
+
 
 class Contributor(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='contributor_user')
-    projects = models.ManyToManyField('Project', related_name='contributor_projects')
+    """ Modèle de contributeur
+
+    Un utilisateur (User) contribue à un ou plusieurs projets
+    
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="contributions", null=False)
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='contributors', null=False)
     created_time = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        unique_together = ['user', 'project']
+
     def __str__(self):
-        return self.user.username
+        return f"{self.user.username} - Contributor"
 
 
 class Project(models.Model):
-    PROJECT_TYPE = [
-        ('back-end', 'back-end'),
-        ('front-end', 'front-end'),
-        ('iOS', 'iOS'),
-        ('Android', 'Android')
-    ]
+    """ Modèle de projet
 
+    Un projet peut être de type back-end, front-end, iOS ou Android.
+
+    Un projet est créé par un utilisateur (User) qui devient automatiquement un contributeur (Contributor).
+
+    Un projet peut avoir plusieurs contributeurs.
+    
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     name = models.CharField(max_length=100)
     description = models.TextField()
-    project_type = models.CharField(max_length=15, choices=PROJECT_TYPE)
-    author = models.ForeignKey(Contributor, on_delete=models.CASCADE, related_name='project_author')
-    contributors = models.ManyToManyField('Contributor', related_name='project_contributors')
-    issues = models.ManyToManyField('Issue', related_name='project_issues')
+    project_type = models.CharField(max_length=15, choices=ProjectType.choices)
+    author = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='created_projects')
     created_time = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.author and not Contributor.objects.filter(user=self.author, project=self).exists():
+            Contributor.objects.create(user=self.author, project=self)
 
     def __str__(self):
         return self.name
 
 
 class Issue(models.Model):
-    PRIORITY = [
-        ('LOW', 'LOW'),
-        ('MEDIUM', 'MEDIUM'),
-        ('HIGH', 'HIGH')
-    ]
-    BALISE = [
-        ('BUG', 'BUG'),
-        ('FEATURE', 'FEATURE'),
-        ('TASK', 'TASK')
-    ]
-    STATUS = [
-        ('To Do', 'To Do'),
-        ('In Progress', 'In Progress'),
-        ('Finished', 'Finished')
-    ]
+    """ Modèle de problème
 
+    Un problème est créé par un contributeur (Contributor) dans un projet.
+
+    Un problème peut être de priorité faible (LOW), moyenne (MEDIUM) ou élevée (HIGH).
+
+    Un problème peut être un bug (BUG), une fonctionnalité (FEATURE) ou une tâche (TASK).
+
+    Un problème peut être à faire, en cours ou terminé.
+
+    Un problème peut avoir plusieurs commentaires.
+
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     title = models.CharField(max_length=100)
     description = models.TextField()
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='issue_project')
-    priority = models.CharField(max_length=15, choices=PRIORITY)
-    balise = models.CharField(max_length=15, choices=BALISE)
-    status = models.CharField(max_length=15, choices=STATUS)
-    author = models.ForeignKey(Contributor, on_delete=models.CASCADE, related_name='issue_author')
-    comments = models.ManyToManyField('Comment', related_name='issue_comments')
+    priority = models.CharField(max_length=15, choices=Priority.choices)
+    balise = models.CharField(max_length=15, choices=Balise.choices)
+    status = models.CharField(max_length=15, choices=Status.choices)
+    author = models.ForeignKey('Contributor', on_delete=models.SET_NULL, null=True, blank=True, related_name='issues')
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='issues')
     created_time = models.DateTimeField(auto_now_add=True)
-
 
     def __str__(self):
         return self.title
 
 
 class Comment(models.Model):
+    """ Modèle de commentaire
+
+    Un commentaire est créé par un contributeur (Contributor) sur un problème (Issue).
+
+    """
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     description = models.TextField()
-    issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name='comment_issue')
-    author = models.ForeignKey(Contributor, on_delete=models.CASCADE, related_name='comment_author')
+    issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(Contributor, on_delete=models.SET_NULL, null=True, blank=True, related_name='comments')
     created_time = models.DateTimeField(auto_now_add=True)
 
-
     def __str__(self):
-        return self.description
+        return f"Par {self.author.user.username} sur {self.issue.title}"
