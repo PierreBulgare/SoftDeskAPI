@@ -1,4 +1,8 @@
 # Dossiers
 env/
+venv/
 __pycache__/
 migrations/
+
+# Fichiers
+*.env

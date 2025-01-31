@@ -32,7 +32,7 @@ IF NOT EXIST "manage.py" (
 
 REM Lance le serveur
 echo [INFO] Lancement du programme...
-start python manage.py runserver
+start pipenv run python manage.py runserver
 
 REM Timeout pour laisser le temps au serveur de démarrer
 timeout /T 3 /NOBREAK >nul
