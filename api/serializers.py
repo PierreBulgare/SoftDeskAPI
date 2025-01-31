@@ -11,15 +11,11 @@ class UserSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'age', 'can_be_contacted', 'can_data_be_shared', 'created_time']
+        fields = ['id', 'username', 'password', 'age', 'can_be_contacted', 'can_data_be_shared', 'created_time']
         extra_kwargs = {'created_time': {'read_only': True}}
 
     def create(self, validated_data):
-        password = validated_data.pop('password')
-        user = User.objects.create_user(**validated_data)
-        user.set_password(password)
-        user.save()
-        return user
+        return User.objects.create_user(**validated_data) 
 
 
 class ContributorSerializer(ModelSerializer):

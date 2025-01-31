@@ -20,7 +20,7 @@ from rest_framework import routers
 
 from api.views import (
     UserViewSet, ContributorViewSet, ProjectViewSet,
-    IssueViewSet, CommentViewSet,
+    IssueViewSet, CommentViewSet, UserCreateView,
     TokenObtainPairView, TokenRefreshView
 )
 
@@ -34,6 +34,7 @@ router.register('comments', CommentViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/register/', UserCreateView.as_view(), name='user-register'),
     path('api-auth/', include('rest_framework.urls')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

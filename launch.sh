@@ -3,67 +3,47 @@
 # Vérifie si Python est installé
 if ! command -v python3 &> /dev/null; then
     echo "[ERREUR] Python n'est pas installé sur votre ordinateur. Veuillez installer Python."
+    # shellcheck disable=SC2162
+    read -p "Appuyez sur Entrée pour quitter..."
     exit 1
 fi
 
-# Crée un environnement virtuel s'il n'existe pas
-if [ ! -d "venv" ]; then
-    echo "[INFO] Création de l'environnement virtuel..."
-    python3 -m venv venv
+# Vérifie si Pipenv est installé
+if ! command -v pipenv &> /dev/null; then
+    echo "[INFO] Pipenv n'est pas installé. Installation en cours..."
+    pip3 install --user pipenv
+    # shellcheck disable=SC2181
+    if [ $? -ne 0 ]; then
+        echo "[ERREUR] L'installation de Pipenv a échoué. Veuillez l'installer manuellement => pip install --user pipenv"
+        # shellcheck disable=SC2162
+        read -p "Appuyez sur Entrée pour quitter..."
+        exit 1
+    fi
 fi
 
-# Active l'environnement virtuel
-echo "[INFO] Activation de l'environnement virtuel..."
-# shellcheck disable=SC1091
-source venv/bin/activate
+# Activation de l'environnement Pipenv
+echo "[INFO] Activation de l'environnement Pipenv..."
+pipenv install
 
-# Vérifie si pip est installé dans l'environnement virtuel
-if ! command -v pip &> /dev/null; then
-    echo "[ERREUR] Pip n'est pas installé dans l'environnement virtuel."
-    deactivate
-    exit 1
-fi
-
-# Mise à jour de pip
-echo "[INFO] Mise à jour de pip..."
-python3 -m pip install --upgrade pip
-if [ $? -ne 0 ]; then
-    echo "[ERREUR] Échec de la mise à jour de pip."
-    deactivate
-    exit 1
-fi
-
-# Installation des packages à partir de requirements.txt
-echo "[INFO] Installation des packages depuis requirements.txt..."
-pip install -r requirements.txt
-if [ $? -ne 0 ]; then
-    echo "[ERREUR] Échec de l'installation des packages depuis requirements.txt."
-    deactivate
-    exit 1
-fi
-
-# Vérifie si manage.py existe avant de l'exécuter
+# Vérifie si manage.py existe dans le répertoire
 if [ ! -f "manage.py" ]; then
     echo "[ERREUR] Le fichier manage.py est introuvable."
-    deactivate
+    # shellcheck disable=SC2162
+    read -p "Appuyez sur Entrée pour quitter..."
     exit 1
 fi
 
-# Lance le serveur Django en arrière-plan
+# Lance le serveur
 echo "[INFO] Lancement du programme..."
-python3 manage.py runserver &
+pipenv run python manage.py runserver &
 
-# Attendre quelques secondes pour s'assurer que le serveur démarre bien
+# Attente pour laisser le temps au serveur de démarrer
 sleep 3
 
-# Ouvrir l'application dans le navigateur par défaut
+# Ouverture du navigateur
 echo "[INFO] Ouverture de l'application sur le navigateur..."
-xdg-open http://127.0.0.1:8000/auth-api/ 2>/dev/null || open http://127.0.0.1:8000/auth-api/ 2>/dev/null || echo "[INFO] Impossible d'ouvrir automatiquement le navigateur."
-
-# Désactive l'environnement virtuel après l'arrêt du serveur
-deactivate
+x-www-browser http://127.0.0.1:8000/api/register/ 2>/dev/null || open http://127.0.0.1:8000/api/register/ 2>/dev/null || echo "[INFO] Ouvrez votre navigateur sur http://127.0.0.1:8000/api/register/"
 
 # Pause
-echo "[INFO] Script terminé. Appuyez sur une touche pour fermer."
 # shellcheck disable=SC2162
-read -n 1 -s
+read -p "Appuyez sur Entrée pour quitter..."
