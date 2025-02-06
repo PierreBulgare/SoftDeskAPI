@@ -2,7 +2,6 @@ from rest_framework.serializers import (
     ModelSerializer, SerializerMethodField,
     CharField, PrimaryKeyRelatedField
 )
-
 from .models import User, Contributor, Project, Issue, Comment
 
 
@@ -11,11 +10,12 @@ class UserSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'password', 'age', 'can_be_contacted', 'can_data_be_shared', 'created_time']
+        fields = ['id', 'username', 'password', 'age',
+                  'can_be_contacted', 'can_data_be_shared', 'created_time']
         extra_kwargs = {'created_time': {'read_only': True}}
 
     def create(self, validated_data):
-        return User.objects.create_user(**validated_data) 
+        return User.objects.create_user(**validated_data)
 
 
 class ContributorSerializer(ModelSerializer):
@@ -34,7 +34,8 @@ class ProjectSerializer(ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ['id', 'name', 'description', 'project_type', 'author', 'contributors', 'created_time']
+        fields = ['id', 'name', 'description', 'project_type',
+                  'author', 'contributors', 'created_time']
         extra_kwargs = {'created_time': {'read_only': True}}
 
     def get_issues(self, obj):
@@ -48,12 +49,16 @@ class IssueSerializer(ModelSerializer):
 
     class Meta:
         model = Issue
-        fields =['id', 'title', 'description', 'priority', 'balise', 'status', 'project', 'author', 'comments', 'created_time']
+        fields = [
+            'id', 'title', 'description', 'priority',
+            'balise', 'status', 'project', 'author',
+            'comments', 'created_time']
         extra_kwargs = {'created_time': {'read_only': True}}
 
     def get_comments(self, obj):
         return CommentSerializer(obj.comments, many=True).data
-    
+
+
 class CommentSerializer(ModelSerializer):
     author = PrimaryKeyRelatedField(queryset=Contributor.objects.all())
     issue = PrimaryKeyRelatedField(queryset=Issue.objects.all())

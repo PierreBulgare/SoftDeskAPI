@@ -31,44 +31,47 @@ class ProjectType(models.TextChoices):
 
 class UserManager(BaseUserManager):
     """ Manager personnalisé pour le modèle User """
-    
+
     def create_user(self, username, password=None, **extra_fields):
         """ Crée et retourne un utilisateur normal """
         if not username:
             raise ValueError("Le champ 'username' est obligatoire")
-        
+
         if not password:
             raise ValueError("Le champ 'password' est obligatoire")
-        
+
         user = self.model(username=username, **extra_fields)
         user.set_password(password)  # Hashage du mot de passe
         user.save(using=self._db)
         return user
-    
+
     def create_superuser(self, username, password, **extra_fields):
         """ Crée et retourne un superutilisateur """
         extra_fields.setdefault("is_superuser", True)
-        extra_fields.setdefault("is_active", True)  # ✅ Assure-toi que le compte est actif
+        extra_fields.setdefault("is_active", True)
 
         return self.create_user(username, password, **extra_fields)
-
 
 
 class User(AbstractBaseUser):
     """ Modèle d'utilisateur
 
-    Un utilisateur peut être membre de plusieurs groupes et avoir plusieurs permissions.
+    Un utilisateur peut être membre de plusieurs groupes
+    et avoir plusieurs permissions.
 
     """
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False, unique=True
+        )
     username = models.CharField(max_length=100, unique=True)
-    age = models.PositiveIntegerField(null=False, blank=False, validators=[MinValueValidator(0)])
+    age = models.PositiveIntegerField(
+        null=False, blank=False, validators=[MinValueValidator(0)]
+        )
     can_be_contacted = models.BooleanField(default=False)
     can_data_be_shared = models.BooleanField(default=False)
     created_time = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
-
 
     objects = UserManager()
 
@@ -82,11 +85,19 @@ class Contributor(models.Model):
     """ Modèle de contributeur
 
     Un utilisateur (User) contribue à un ou plusieurs projets
-    
+
     """
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="contributions", null=False)
-    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='contributors', null=False)
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False, unique=True
+        )
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE,
+        related_name="contributions", null=False
+        )
+    project = models.ForeignKey(
+        'Project', on_delete=models.CASCADE,
+        related_name='contributors', null=False
+        )
     created_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -101,22 +112,32 @@ class Project(models.Model):
 
     Un projet peut être de type back-end, front-end, iOS ou Android.
 
-    Un projet est créé par un utilisateur (User) qui devient automatiquement un contributeur (Contributor).
+    Un projet est créé par un utilisateur (User)
+    qui devient automatiquement un contributeur (Contributor).
 
     Un projet peut avoir plusieurs contributeurs.
-    
+
     """
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False, unique=True
+        )
     name = models.CharField(max_length=100)
     description = models.TextField()
-    project_type = models.CharField(max_length=15, choices=ProjectType.choices)
-    author = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='created_projects')
+    project_type = models.CharField(
+        max_length=15, choices=ProjectType.choices
+        )
+    author = models.ForeignKey(
+        'User', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='created_projects'
+        )
     created_time = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        if self.author and not Contributor.objects.filter(user=self.author, project=self).exists():
+        if (self.author
+            and not Contributor.objects.filter(
+                user=self.author, project=self).exists()):
             Contributor.objects.create(user=self.author, project=self)
 
     def __str__(self):
@@ -128,9 +149,11 @@ class Issue(models.Model):
 
     Un problème est créé par un contributeur (Contributor) dans un projet.
 
-    Un problème peut être de priorité faible (LOW), moyenne (MEDIUM) ou élevée (HIGH).
+    Un problème peut être de priorité faible (LOW),
+    moyenne (MEDIUM) ou élevée (HIGH).
 
-    Un problème peut être un bug (BUG), une fonctionnalité (FEATURE) ou une tâche (TASK).
+    Un problème peut être un bug (BUG), une fonctionnalité (FEATURE)
+    ou une tâche (TASK).
 
     Un problème peut être à faire, en cours ou terminé.
 
@@ -138,14 +161,21 @@ class Issue(models.Model):
 
     """
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False, unique=True
+        )
     title = models.CharField(max_length=100)
     description = models.TextField()
     priority = models.CharField(max_length=15, choices=Priority.choices)
     balise = models.CharField(max_length=15, choices=Balise.choices)
     status = models.CharField(max_length=15, choices=Status.choices)
-    author = models.ForeignKey('Contributor', on_delete=models.SET_NULL, null=True, blank=True, related_name='issues')
-    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='issues')
+    author = models.ForeignKey(
+        'Contributor', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='issues'
+        )
+    project = models.ForeignKey(
+        'Project', on_delete=models.CASCADE, related_name='issues'
+        )
     created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -155,14 +185,22 @@ class Issue(models.Model):
 class Comment(models.Model):
     """ Modèle de commentaire
 
-    Un commentaire est créé par un contributeur (Contributor) sur un problème (Issue).
+    Un commentaire est créé par un contributeur (Contributor)
+    sur un problème (Issue).
 
     """
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False, unique=True
+        )
     description = models.TextField()
-    issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name='comments')
-    author = models.ForeignKey(Contributor, on_delete=models.SET_NULL, null=True, blank=True, related_name='comments')
+    issue = models.ForeignKey(
+        Issue, on_delete=models.CASCADE, related_name='comments'
+        )
+    author = models.ForeignKey(
+        Contributor, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='comments'
+        )
     created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

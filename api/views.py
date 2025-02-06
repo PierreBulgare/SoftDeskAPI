@@ -2,17 +2,20 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.generics import CreateAPIView
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .models import User, Contributor, Project, Issue, Comment
-from .serializers import UserSerializer, ContributorSerializer, ProjectSerializer, IssueSerializer, CommentSerializer
+from .serializers import (
+    UserSerializer, ContributorSerializer,
+    ProjectSerializer, IssueSerializer, CommentSerializer
+)
+from .permissions import ProjectPermission
 
-# Create
+
 class UserCreateView(CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
-# Read
+
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -28,7 +31,7 @@ class ContributorViewSet(ModelViewSet):
 class ProjectViewSet(ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ProjectPermission]
 
 
 class IssueViewSet(ModelViewSet):

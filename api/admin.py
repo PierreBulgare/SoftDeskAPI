@@ -4,7 +4,10 @@ from .models import User, Contributor, Project, Issue, Comment
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'age', 'can_be_contacted', 'can_data_be_shared', 'created_time')
+    list_display = (
+        'username', 'age', 'can_be_contacted',
+        'can_data_be_shared', 'created_time'
+        )
     search_fields = ('username',)
     ordering = ('-created_time',)
 
@@ -24,7 +27,10 @@ class ProjectAdmin(admin.ModelAdmin):
 
 @admin.register(Issue)
 class IssueAdmin(admin.ModelAdmin):
-    list_display = ('title', 'project', 'priority', 'balise', 'status', 'author', 'created_time')
+    list_display = (
+        'title', 'project', 'priority', 'balise',
+        'status', 'author', 'created_time'
+        )
     search_fields = ('title', 'project__name')
     list_filter = ('priority', 'balise', 'status')
 
