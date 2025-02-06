@@ -21,8 +21,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from api.views import (
     UserViewSet, ContributorViewSet, ProjectViewSet,
-    IssueViewSet, CommentViewSet, UserCreateView,
-    TokenObtainPairView, TokenRefreshView
+    IssueViewSet, CommentViewSet, UserCreateView
 )
 
 router = routers.SimpleRouter()

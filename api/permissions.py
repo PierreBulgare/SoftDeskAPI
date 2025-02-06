@@ -38,24 +38,33 @@ class IssuePermission(BasePermission):
         """ Gère les permissions générales (liste, création, lecture...) """
 
         if not request.user.is_authenticated:
+            print("User not authenticated")
             return False
+        
+        if request.method == "GET" and "project_pk" not in view.kwargs:
+            return True
 
         project_id = (
             view.kwargs.get("project_pk") or request.data.get("project")
         )
         if not project_id:
+            print("No project ID")
             return False
 
-        from .models import Project
+        from .models import Project, Contributor
         try:
             project = Project.objects.get(id=project_id)
         except Project.DoesNotExist:
+            print("Project does not exist")
             return False
 
-        is_contributor = project.contributors.filter(
-            user=request.user).exists()
+        is_contributor = (
+            Contributor.objects.filter(
+                user=request.user, project=project).exists()
+        )
 
         if request.method in SAFE_METHODS or request.method == "POST":
+            print("Safe methods or POST")
             return is_contributor
 
         return True
@@ -63,8 +72,12 @@ class IssuePermission(BasePermission):
     def has_object_permission(self, request, view, obj):
         """ Gère les permissions spécifiques à un objet `Issue` """
 
-        is_contributor = obj.project.contributors.filter(
-            user=request.user).exists()
+        from .models import Contributor
+
+        is_contributor = (
+            Contributor.objects.filter(
+                user=request.user, project=obj.project).exists()
+        )
 
         if request.method in SAFE_METHODS:
             return is_contributor
@@ -84,22 +97,29 @@ class CommentPermission(BasePermission):
         """ Gère les permissions générales (liste, création, lecture...) """
 
         if not request.user.is_authenticated:
+            print("User not authenticated")
             return False
+        
+        if request.method == "GET" and "issue_pk" not in view.kwargs:
+            print("GET request")
+            return True
 
         issue_id = (
-            view.kwargs.get("project_pk") or request.data.get("project")
+            view.kwargs.get("issue_pk") or request.data.get("issue")
             )
         if not issue_id:
             return False
 
-        from .models import Issue
+        from .models import Issue, Contributor
         try:
             issue = Issue.objects.get(id=issue_id)
         except Issue.DoesNotExist:
             return False
 
-        is_contributor = issue.project.contributors.filter(
-            user=request.user).exists()
+        is_contributor = (
+            Contributor.objects.filter(
+                user=request.user, project=issue.project).exists()
+        )
 
         if request.method in SAFE_METHODS or request.method == "POST":
             return is_contributor
@@ -109,8 +129,12 @@ class CommentPermission(BasePermission):
     def has_object_permission(self, request, view, obj):
         """ Gère les permissions spécifiques à un objet `Comment` """
 
-        is_contributor = obj.issue.project.contributors.filter(
-            user=request.user).exists()
+        from .models import Contributor
+
+        is_contributor = (
+            Contributor.objects.filter(
+                user=request.user, project=obj.issue.project).exists()
+        )
 
         if request.method in SAFE_METHODS:
             return is_contributor
