@@ -19,10 +19,11 @@ from django.urls import path, include
 from rest_framework import routers
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from api.views import (
-    UserViewSet, ContributorViewSet, ProjectViewSet,
-    IssueViewSet, CommentViewSet, UserCreateView
-)
+from authentication.views import UserCreateView, UserViewSet
+from contributors.views import ContributorViewSet
+from projects.views import ProjectViewSet
+from issues.views import IssueViewSet
+from comments.views import CommentViewSet
 
 router = routers.SimpleRouter()
 router.register('users', UserViewSet)
