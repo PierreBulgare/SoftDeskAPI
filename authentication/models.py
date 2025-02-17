@@ -2,6 +2,7 @@ from django.db import models
 import uuid
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.validators import MinValueValidator
+from datetime import date
 
 
 class UserManager(BaseUserManager):
@@ -40,9 +41,7 @@ class User(AbstractBaseUser):
         primary_key=True, default=uuid.uuid4, editable=False, unique=True
         )
     username = models.CharField(max_length=100, unique=True)
-    age = models.PositiveIntegerField(
-        null=False, blank=False, validators=[MinValueValidator(0)]
-        )
+    birth_date = models.DateField(null=True, blank=True)
     can_be_contacted = models.BooleanField(default=False)
     can_data_be_shared = models.BooleanField(default=False)
     created_time = models.DateTimeField(auto_now_add=True)
@@ -54,3 +53,10 @@ class User(AbstractBaseUser):
 
     def __str__(self):
         return self.username
+    
+    @property
+    def age(self):
+        """ Retourne l'âge de l'utilisateur """
+        if self.birth_date:
+            return date.today().year - self.birth_date.year
+        return None

@@ -26,7 +26,7 @@ from issues.views import IssueViewSet
 from comments.views import CommentViewSet
 
 router = routers.SimpleRouter()
-router.register('users', UserViewSet)
+router.register('users', UserViewSet, basename='user')
 router.register('contributors', ContributorViewSet)
 router.register('projects', ProjectViewSet)
 router.register('issues', IssueViewSet)
