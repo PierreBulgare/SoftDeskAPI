@@ -15,7 +15,8 @@ SoftDesk API est une API RESTful permettant aux utilisateurs de gérer et suivre
 
 * Packages requis :
   * `Django` 5.1.5 - Framework utilisé pour la conception de l'application
-  * `jangorestframework` 3.15.2 - Framework utilisé pour l'API
+  * `djangorestframework` 3.15.2 - Framework utilisé pour l'API
+  * `djangorestframework-simplejwt`
 
 ## Mode d'emploi
 ### Installation de l'environnement Python virtuel
