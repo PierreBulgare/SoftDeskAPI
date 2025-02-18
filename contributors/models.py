@@ -17,7 +17,7 @@ class Contributor(models.Model):
         User, on_delete=models.CASCADE,
         related_name="contributions", null=False
         )
-    
+
     project = models.ForeignKey(
         Project, on_delete=models.CASCADE,
         related_name='contributors', null=False

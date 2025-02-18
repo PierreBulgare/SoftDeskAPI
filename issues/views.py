@@ -1,8 +1,8 @@
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import Issue
 from .serializers import IssueSerializer
 from .permissions import IssuePermission
+
 
 class IssueViewSet(ModelViewSet):
     queryset = Issue.objects.all()
@@ -16,4 +16,5 @@ class IssueViewSet(ModelViewSet):
         if not user.is_authenticated:
             return Issue.objects.none()
 
-        return Issue.objects.filter(project__contributors__user=user).distinct()
+        return Issue.objects.filter(
+            project__contributors__user=user).distinct()

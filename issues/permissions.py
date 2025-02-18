@@ -15,7 +15,7 @@ class IssuePermission(BasePermission):
         if not request.user.is_authenticated:
             print("User not authenticated")
             return False
-        
+
         if request.method == "GET" and "project_pk" not in view.kwargs:
             return True
 

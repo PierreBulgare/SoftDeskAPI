@@ -1,7 +1,6 @@
 from django.db import models
 import uuid
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from django.core.validators import MinValueValidator
 from datetime import date
 
 
@@ -53,7 +52,7 @@ class User(AbstractBaseUser):
 
     def __str__(self):
         return self.username
-    
+
     @property
     def age(self):
         """ Retourne l'âge de l'utilisateur """

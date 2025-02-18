@@ -3,6 +3,7 @@ from django.db import models
 from contributors.models import Contributor
 from issues.models import Issue
 
+
 class Comment(models.Model):
     """ Modèle de commentaire
 

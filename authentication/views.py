@@ -29,22 +29,24 @@ class UserViewSet(ModelViewSet):
         - Ajoute les propres données de l'utilisateur connecté.
         """
         user = self.request.user
-        return User.objects.filter(can_data_be_shared=True) | User.objects.filter(id=user.id)
+        shared_users = User.objects.filter(can_data_be_shared=True)
+        return shared_users | User.objects.filter(id=user.id)
 
     def update(self, request, *args, **kwargs):
-            """
-            Autorise uniquement la mise à jour des données de l'utilisateur connecté.
-            """
-            instance = self.get_object()
+        """
+        Autorise uniquement la mise à jour
+        des données de l'utilisateur connecté.
+        """
+        instance = self.get_object()
 
-            # Vérifie que l'utilisateur connecté est bien celui qui modifie
-            if instance != request.user:
-                raise PermissionDenied(
-                     "Vous ne pouvez modifier que vos propres informations."
-                     )
+        # Vérifie que l'utilisateur connecté est bien celui qui modifie
+        if instance != request.user:
+            raise PermissionDenied(
+                    "Vous ne pouvez modifier que vos propres informations."
+                    )
 
-            return super().update(request, *args, **kwargs)
-    
+        return super().update(request, *args, **kwargs)
+
     def destroy(self, request, *args, **kwargs):
         """
         Autorise uniquement la suppression de l'utilisateur connecté.
@@ -58,7 +60,7 @@ class UserViewSet(ModelViewSet):
                 )
 
         super().destroy(request, *args, **kwargs)
-    
+
         # Retourne un message de confirmation
         return Response(
             {"message": "Votre compte a bien été supprimé."},

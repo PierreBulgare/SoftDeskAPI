@@ -1,8 +1,8 @@
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import Comment
 from .serializers import CommentSerializer
 from .permissions import CommentPermission
+
 
 class CommentViewSet(ModelViewSet):
     queryset = Comment.objects.all()
@@ -16,4 +16,5 @@ class CommentViewSet(ModelViewSet):
         if not user.is_authenticated:
             return Comment.objects.none()
 
-        return Comment.objects.filter(issue__project__contributors__user=user).distinct()
+        return Comment.objects.filter(
+            issue__project__contributors__user=user).distinct()

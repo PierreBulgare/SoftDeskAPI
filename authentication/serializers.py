@@ -6,6 +6,7 @@ from .models import User
 
 AGE_LIMIT = 15
 
+
 class UserSerializer(ModelSerializer):
     password = CharField(write_only=True)
     age = SerializerMethodField()
@@ -24,7 +25,10 @@ class UserSerializer(ModelSerializer):
         """Valide que l'utilisateur a au moins 15 ans."""
         from datetime import date
         today = date.today()
-        age = today.year - value.year - ((today.month, today.day) < (value.month, value.day))
+        age = today.year - value.year
+        if (today.month, today.day) < (value.month, value.day):
+            age -= 1
+
         if age < AGE_LIMIT:
             raise ValidationError(
                 "Vous devez avoir au moins 15 ans pour vous inscrire."
@@ -33,7 +37,7 @@ class UserSerializer(ModelSerializer):
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
-    
+
     def update(self, instance, validated_data):
         """
         Met à jour les champs autorisés.

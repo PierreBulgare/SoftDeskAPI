@@ -1,8 +1,11 @@
-from rest_framework.serializers import ModelSerializer, SerializerMethodField, PrimaryKeyRelatedField
+from rest_framework.serializers import (
+    ModelSerializer, SerializerMethodField, PrimaryKeyRelatedField
+)
 from rest_framework.serializers import ValidationError
 from .models import Comment
 from contributors.models import Contributor
 from issues.models import Issue
+
 
 class CommentSerializer(ModelSerializer):
     author = SerializerMethodField()  # Récupère l'auteur dynamiquement

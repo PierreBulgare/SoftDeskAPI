@@ -23,11 +23,11 @@ class IssueSerializer(ModelSerializer):
 
     def get_comments(self, obj):
         return CommentSerializer(obj.comments, many=True).data
-    
+
     def get_author(self, obj):
         """ Renvoie l'ID du contributeur associé à l'auteur de l'issue """
         return obj.author.id if obj.author else None
-    
+
     def create(self, validated_data):
         """ Associe automatiquement le contributeur
         correspondant à l'utilisateur """

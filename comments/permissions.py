@@ -15,7 +15,7 @@ class CommentPermission(BasePermission):
         if not request.user.is_authenticated:
             print("User not authenticated")
             return False
-        
+
         if request.method == "GET" and "issue_pk" not in view.kwargs:
             print("GET request")
             return True
