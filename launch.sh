@@ -40,10 +40,6 @@ pipenv run python manage.py runserver &
 # Attente pour laisser le temps au serveur de démarrer
 sleep 3
 
-# Ouverture du navigateur
-echo "[INFO] Ouverture de l'application sur le navigateur..."
-x-www-browser http://127.0.0.1:8000/api/register/ 2>/dev/null || open http://127.0.0.1:8000/api/register/ 2>/dev/null || echo "[INFO] Ouvrez votre navigateur sur http://127.0.0.1:8000/api/register/"
-
 # Pause
 # shellcheck disable=SC2162
 read -p "Appuyez sur Entrée pour quitter..."

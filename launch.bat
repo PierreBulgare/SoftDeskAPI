@@ -37,9 +37,5 @@ start pipenv run python manage.py runserver
 REM Timeout pour laisser le temps au serveur de démarrer
 timeout /T 3 /NOBREAK >nul
 
-REM Ouverture du navigateur
-echo [INFO] Ouverture de l'application sur le navigateur...
-start http://127.0.0.1:8000/api/register/
-
 REM Pause
 pause
