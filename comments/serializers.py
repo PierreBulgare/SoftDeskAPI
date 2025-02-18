@@ -20,6 +20,14 @@ class CommentSerializer(ModelSerializer):
         """ Renvoie l'ID du contributeur associé à l'auteur du commentaire """
         return obj.author.id if obj.author else None
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        if self.context.get('exclude_issue', False):
+            representation.pop('issue', None)
+
+        return representation
+
     def create(self, validated_data):
         """ Associe automatiquement le contributeur
         correspondant à l'utilisateur """

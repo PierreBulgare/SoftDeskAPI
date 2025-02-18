@@ -23,6 +23,18 @@ class CommentPermission(BasePermission):
         issue_id = (
             view.kwargs.get("issue_pk") or request.data.get("issue")
             )
+        
+        if request.method == "DELETE":
+            from .models import Comment
+            comment_id = view.kwargs.get("pk")
+            if comment_id:
+                try:
+                    comment = Comment.objects.get(id=comment_id)
+                    issue_id = comment.issue.id
+                except Comment.DoesNotExist:
+                    print("Comment does not exist")
+                    return False
+
         if not issue_id:
             return False
 
@@ -55,4 +67,4 @@ class CommentPermission(BasePermission):
         if request.method in SAFE_METHODS:
             return is_contributor
 
-        return request.user == obj.author
+        return request.user == obj.author.user

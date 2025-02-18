@@ -15,13 +15,25 @@ class IssuePermission(BasePermission):
         if not request.user.is_authenticated:
             print("User not authenticated")
             return False
-
+        
         if request.method == "GET" and "project_pk" not in view.kwargs:
             return True
 
         project_id = (
             view.kwargs.get("project_pk") or request.data.get("project")
         )
+
+        if request.method in ["PATCH", "DELETE"]:
+            from .models import Issue
+            issue_id = view.kwargs.get("pk")
+            if issue_id:
+                try:
+                    issue = Issue.objects.get(id=issue_id)
+                    project_id = issue.project.id
+                except Issue.DoesNotExist:
+                    print("Issue does not exist")
+                    return False
+
         if not project_id:
             print("No project ID")
             return False
@@ -49,12 +61,13 @@ class IssuePermission(BasePermission):
 
         from .models import Contributor
 
-        is_contributor = (
-            Contributor.objects.filter(
-                user=request.user, project=obj.project).exists()
-        )
+        print(f"Utilisateur connecté : {request.user}")
+        print(f"Auteur de l'issue : {obj.author.user}")
 
-        if request.method in SAFE_METHODS:
-            return is_contributor
+        if request.method in SAFE_METHODS:  # Lecture autorisée pour les contributeurs
+            return Contributor.objects.filter(
+                user=request.user, project=obj.project
+            ).exists()
 
-        return request.user == obj.author
+        # Seul l'auteur peut modifier ou supprimer l'issue
+        return request.user == obj.author.user
