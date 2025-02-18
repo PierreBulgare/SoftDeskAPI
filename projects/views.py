@@ -18,7 +18,7 @@ class ProjectViewSet(ModelViewSet):
         Permet à un utilisateur de souscrire
         à un projet en tant que contributeur.
         """
-    
+
         project = self.get_object()
         user = request.user
 

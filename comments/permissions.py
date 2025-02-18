@@ -23,7 +23,7 @@ class CommentPermission(BasePermission):
         issue_id = (
             view.kwargs.get("issue_pk") or request.data.get("issue")
             )
-        
+
         if request.method == "DELETE":
             from .models import Comment
             comment_id = view.kwargs.get("pk")

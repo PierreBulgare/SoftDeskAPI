@@ -15,7 +15,7 @@ class IssuePermission(BasePermission):
         if not request.user.is_authenticated:
             print("User not authenticated")
             return False
-        
+
         if request.method == "GET" and "project_pk" not in view.kwargs:
             return True
 
@@ -64,7 +64,7 @@ class IssuePermission(BasePermission):
         print(f"Utilisateur connecté : {request.user}")
         print(f"Auteur de l'issue : {obj.author.user}")
 
-        if request.method in SAFE_METHODS:  # Lecture autorisée pour les contributeurs
+        if request.method in SAFE_METHODS:
             return Contributor.objects.filter(
                 user=request.user, project=obj.project
             ).exists()

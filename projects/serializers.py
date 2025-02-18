@@ -29,7 +29,7 @@ class ProjectSerializer(ModelSerializer):
         request = self.context.get('request', None)
         if (request
             and request.parser_context
-            and 'pk' in request.parser_context['kwargs']):
+                and 'pk' in request.parser_context['kwargs']):
             representation['issues'] = IssueSerializer(
                 instance.issues.all(),
                 many=True,

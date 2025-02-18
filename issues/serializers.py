@@ -27,7 +27,7 @@ class IssueSerializer(ModelSerializer):
     def get_author(self, obj):
         """ Renvoie l'ID du contributeur associé à l'auteur de l'issue """
         return obj.author.id if obj.author else None
-    
+
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         request = self.context.get('request', None)
@@ -43,9 +43,8 @@ class IssueSerializer(ModelSerializer):
             representation.pop('project', None)
 
         # Ajouter les commentaires uniquement dans la vue détaillée de l'issue
-        if (request
-            and request.parser_context
-            and 'pk' in request.parser_context['kwargs']):
+        if (request and request.parser_context and
+                'pk' in request.parser_context['kwargs']):
             representation['comments'] = CommentSerializer(
                 instance.comments.all(),
                 many=True,

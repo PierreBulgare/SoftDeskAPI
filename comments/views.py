@@ -24,9 +24,9 @@ class CommentViewSet(ModelViewSet):
         ).select_related('issue', 'issue__project').distinct()
 
     def destroy(self, request, *args, **kwargs):
-            instance = self.get_object()
-            self.perform_destroy(instance)
-            return Response(
-                {"message": "Le commentaire a été supprimée avec succès."},
-                status=status.HTTP_200_OK
-            )
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(
+            {"message": "Le commentaire a été supprimée avec succès."},
+            status=status.HTTP_200_OK
+        )
