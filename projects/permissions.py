@@ -20,7 +20,7 @@ class ProjectPermission(BasePermission):
     def has_object_permission(self, request, view, obj):
         """ Gère les permissions spécifiques à un objet """
 
-        if view.action in ["retrieve", "list"]:
+        if view.action in ["retrieve", "list", "subscribe"]:
             return True
 
         return request.user == obj.author
